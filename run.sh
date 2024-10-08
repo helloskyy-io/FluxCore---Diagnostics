@@ -54,12 +54,22 @@ run_as_fluxuser() {
         exit 1
     fi
 
-    # Install Python 3.12 if not installed
+    # Check if Python 3.12 is installed
     if ! pyenv versions | grep -q "3.12.0"; then
-        echo "Installing Python 3.12..."
+        echo "Python 3.12 is not installed. Installing dependencies and Python..."
+
+        # Install necessary build dependencies for Python compilation
+        sudo apt-get update
+        sudo apt-get install -y \
+            make build-essential libssl-dev zlib1g-dev \
+            libbz2-dev libreadline-dev libsqlite3-dev wget curl \
+            llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev \
+            libffi-dev liblzma-dev python-openssl git
+
+        # Install Python 3.12 using pyenv
         pyenv install 3.12.0
     else
-        echo "python version already 3.12.0.... skipping"
+        echo "Python 3.12.0 is already installed... skipping"
     fi
 
     # Create a virtual environment if it doesn't exist
@@ -81,3 +91,4 @@ EOF
 # Main Execution
 sudo_check
 run_as_fluxuser
+
