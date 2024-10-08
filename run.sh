@@ -24,12 +24,27 @@ run_as_fluxuser() {
     export PYENV_ROOT="\$HOME/.pyenv"
     export PATH="\$PYENV_ROOT/bin:\$PATH"
 
-    # Initialize pyenv
+    # Check if pyenv is installed
+    if ! command -v pyenv &> /dev/null; then
+        echo "pyenv not found. Installing pyenv..."
+        curl https://pyenv.run | bash
+
+        # Add pyenv to bashrc for future sessions
+        echo 'export PYENV_ROOT="\$HOME/.pyenv"' >> ~/.bashrc
+        echo 'export PATH="\$PYENV_ROOT/bin:\$PATH"' >> ~/.bashrc
+        echo 'eval "\$(pyenv init --path)"' >> ~/.bashrc
+        echo 'eval "\$(pyenv init -)"' >> ~/.bashrc
+
+        # Source the bashrc to reload environment
+        source ~/.bashrc
+    fi
+
+    # Initialize pyenv in the current shell
     if command -v pyenv >/dev/null 2>&1; then
         eval "\$(pyenv init --path)"
         eval "\$(pyenv init -)"
     else
-        echo "pyenv is not installed or not found"
+        echo "pyenv is still not available after installation"
         exit 1
     fi
 
