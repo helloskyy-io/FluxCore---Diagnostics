@@ -41,8 +41,11 @@ def run_diagnostics():
     test_name = f'{config["nvidia_driver"]["test"]} {config["nvidia_driver"]["expected_version"]}'
     result, recommendation = check_nvidia_driver_version()
 
+    # Apply green color for "Installed" and red for "Failed"
+    result_colored = f'[green]{result}[/green]' if result == "Installed" else f'[red]{result}[/red]'
+
     # Add the result to the table
-    table.add_row(test_name, result, recommendation)
+    table.add_row(test_name, result_colored, recommendation)
 
     # Print the table to the console
     console.print(table)
