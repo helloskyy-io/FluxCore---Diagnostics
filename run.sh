@@ -1,3 +1,3 @@
 #!/bin/bash
 
-echo "it works!"
+sudo ./py/diagnostics.py
