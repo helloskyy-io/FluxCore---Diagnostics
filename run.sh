@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Function to manage sudo permissions
+# Function to manage Sudo
 sudo_check() {
     echo "Checking if sudo requires a password..."
     if sudo -n true 2>/dev/null; then
@@ -16,7 +16,7 @@ sudo_check() {
     echo ""
 }
 
-# Function to install system dependencies
+# Function to install system dependencies for Python build
 install_dependencies() {
     echo "Installing development libraries required for Python build..."
     sudo apt-get update
@@ -27,14 +27,19 @@ install_dependencies() {
         build-essential
 }
 
-# Function to install pyenv as fluxuser
+# Function to install pyenv as fluxuser if not already installed
 install_pyenv() {
     sudo -i -u fluxuser bash << 'EOF'
     if ! command -v pyenv &> /dev/null; then
-        echo "pyenv not found or not properly installed. Installing pyenv..."
-        curl https://pyenv.run | bash
+        echo "pyenv not found or not properly installed. Cleaning up and reinstalling pyenv..."
+
+        # Remove any existing pyenv directory to avoid conflicts
+        sudo rm -rf /home/fluxuser/.pyenv
         
-        # Add pyenv to bashrc for future sessions
+        # Install pyenv
+        curl https://pyenv.run | bash
+
+        # Add pyenv to bashrc for future sessions (only needed on first install)
         echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
         echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
         echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
@@ -66,7 +71,7 @@ install_python() {
 EOF
 }
 
-# Function to create a virtualenv for diagnostics
+# Function to create a virtual environment if it doesn't exist
 create_virtualenv() {
     sudo -i -u fluxuser bash << 'EOF'
     export PYENV_ROOT="$HOME/.pyenv"
@@ -78,6 +83,23 @@ create_virtualenv() {
         echo "Creating virtual environment..."
         pyenv virtualenv 3.12.0 fluxcore-diagnostics-env
     fi
+EOF
+}
+
+# Function to install Python packages inside the virtualenv
+install_python_packages() {
+    sudo -i -u fluxuser bash << 'EOF'
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
+    pyenv activate fluxcore-diagnostics-env
+
+    # Upgrade pip
+    pip install --upgrade pip
+
+    # Install required Python packages from pinned_reqs.txt
+    pip install -r /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
 EOF
 }
 
@@ -113,7 +135,11 @@ install_python
 # Create virtual environment if not already created
 create_virtualenv
 
+# Install necessary Python packages inside the virtualenv
+install_python_packages
+
 # Run diagnostics
 run_diagnostics
+
 
 
