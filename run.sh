@@ -16,6 +16,10 @@ sudo_check() {
     echo ""
 }
 
+# Main function to run everything under fluxuser
+run_as_fluxuser() {
+    sudo -i -u fluxuser bash << 'EOF'
+
     # Check if pyenv is installed
     if ! command -v pyenv &> /dev/null; then
         echo "pyenv not found or not properly installed. Cleaning up and reinstalling pyenv..."
