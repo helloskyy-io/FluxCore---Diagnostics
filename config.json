@@ -1,0 +1,8 @@
+{
+    "nvidia_driver_version": "550",
+    "recommended_action": {
+      "success": "None",
+      "failure": "Please purge and reinstall Nvidia driver 550"
+    }
+  }
+  
