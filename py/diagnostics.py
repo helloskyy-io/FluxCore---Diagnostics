@@ -22,7 +22,7 @@ def check_nvidia_driver_version():
         
         # Compare the installed version with the expected version from config.json
         expected_version = config["nvidia_driver"]["expected_version"]
-        if installed_version == expected_version:
+        if installed_version.startswith(expected_version):
             return "Installed", config["nvidia_driver"]["pass_recommendation"]
         else:
             return "Failed", f"Installed version {installed_version}. Please purge and reinstall Nvidia driver {expected_version}."
@@ -49,4 +49,3 @@ def run_diagnostics():
 
 # Run diagnostics
 run_diagnostics()
-
