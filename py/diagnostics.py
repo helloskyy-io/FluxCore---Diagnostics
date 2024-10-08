@@ -1,47 +1,52 @@
 import json
+import subprocess
 from rich.console import Console
 from rich.table import Table
-import subprocess
 
-console = Console()
-
-# Load configuration from JSON file
+# Load the configuration from config.json
 with open("/home/fluxuser/FluxCore-Diagnostics/config.json") as config_file:
     config = json.load(config_file)
 
-def check_nvidia_driver(version):
-    try:
-        # Run a shell command to check for Nvidia driver version
-        result = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if version in result.stdout:
-            return True
-        else:
-            return False
-    except Exception as e:
-        return False
+console = Console()
 
-def main():
-    console.print("[bold cyan]Running diagnostics...[/bold cyan]")
+def check_nvidia_driver_version():
+    # Get the installed Nvidia driver version
+    try:
+        result = subprocess.run(['nvidia-smi', '--query-gpu=driver_version', '--format=csv,noheader'], 
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        installed_version = result.stdout.strip()
+
+        # Check if the command was successful
+        if result.returncode != 0 or not installed_version:
+            return "Failed", config["nvidia_driver"]["fail_recommendation"]
+        
+        # Compare the installed version with the expected version from config.json
+        expected_version = config["nvidia_driver"]["expected_version"]
+        if installed_version == expected_version:
+            return "Installed", config["nvidia_driver"]["pass_recommendation"]
+        else:
+            return "Failed", f"Installed version {installed_version}. Please purge and reinstall Nvidia driver {expected_version}."
+    except Exception as e:
+        return "Failed", str(e)
+
+def run_diagnostics():
     table = Table(title="Diagnostics Results")
 
-    table.add_column("Test", justify="left", style="cyan", no_wrap=True)
-    table.add_column("Result", justify="center", style="green")
-    table.add_column("Recommendation", justify="left", style="magenta")
+    # Define table columns
+    table.add_column("Test", justify="left")
+    table.add_column("Result", justify="center")
+    table.add_column("Recommendation", justify="center")
 
     # Nvidia driver check
-    driver_version = config['nvidia_driver_version']
-    nvidia_installed = check_nvidia_driver(driver_version)
-    if nvidia_installed:
-        result = "[green]Installed[/green]"
-        recommendation = config['recommended_action']['success']
-    else:
-        result = "[red]Failed[/red]"
-        recommendation = config['recommended_action']['failure']
+    test_name = f'{config["nvidia_driver"]["test"]} {config["nvidia_driver"]["expected_version"]}'
+    result, recommendation = check_nvidia_driver_version()
 
-    table.add_row(f"Testing for Nvidia Driver {driver_version}", result, recommendation)
+    # Add the result to the table
+    table.add_row(test_name, result, recommendation)
 
+    # Print the table to the console
     console.print(table)
 
-if __name__ == "__main__":
-    main()
+# Run diagnostics
+run_diagnostics()
 
