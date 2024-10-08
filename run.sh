@@ -16,52 +16,48 @@ sudo_check() {
     echo ""
 }
 
-# Main function to run everything under fluxuser
 run_as_fluxuser() {
     sudo -i -u fluxuser bash << 'EOF'
     
-    # Check if curl is installed
-    if ! command -v curl &> /dev/null; then
-        echo "curl not found. Please install it before running the script."
-        exit 1
-    fi
-
-    # Ensure pyenv is properly configured
-    export PYENV_ROOT="\$HOME/.pyenv"
-    export PATH="\$PYENV_ROOT/bin:\$PATH"
-
+    # Optionally, change to the FluxCore-Diagnostics directory if you plan to run diagnostics
+    # cd /home/fluxuser/FluxCore-Diagnostics  # Adjust if you need to run something in this directory
+    
     # Check if pyenv is installed
     if ! command -v pyenv &> /dev/null; then
         echo "pyenv not found. Installing pyenv..."
         curl https://pyenv.run | bash
 
         # Add pyenv to bashrc for future sessions
-        echo 'export PYENV_ROOT="\$HOME/.pyenv"' >> ~/.bashrc
-        echo 'export PATH="\$PYENV_ROOT/bin:\$PATH"' >> ~/.bashrc
-        echo 'eval "\$(pyenv init --path)"' >> ~/.bashrc
-        echo 'eval "\$(pyenv init -)"' >> ~/.bashrc
+        echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+        echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+        echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
+        echo 'eval "$(pyenv init -)"' >> ~/.bashrc
 
-        # Source the bashrc to reload environment
+        # Source the bashrc to reload environment for current session
         source ~/.bashrc
     fi
 
-    # Initialize pyenv in the current shell
+    # After installation, configure the environment variables for the current session
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+
+    # Initialize pyenv in the current shell session
     if command -v pyenv >/dev/null 2>&1; then
-        eval "\$(pyenv init --path)"
-        eval "\$(pyenv init -)"
+        eval "$(pyenv init --path)"
+        eval "$(pyenv init -)"
     else
         echo "pyenv is still not available after installation"
         exit 1
     fi
 
-    # Install Python 3.12 if not installed
+    # Install Python 3.12 if not already installed
     if ! pyenv versions | grep -q "3.12.0"; then
         echo "Installing Python 3.12..."
         pyenv install 3.12.0
     fi
 
     # Create a virtual environment if it doesn't exist
-    if [ ! -d "\$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
+    if [ ! -d "$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
         echo "Creating virtual environment..."
         pyenv virtualenv 3.12.0 fluxcore-diagnostics-env
     fi
@@ -69,13 +65,8 @@ run_as_fluxuser() {
     # Activate the virtual environment
     export PYENV_VIRTUALENV_DISABLE_PROMPT=1
     pyenv activate fluxcore-diagnostics-env
-
-    # Install Python packages
-    echo "Installing required Python packages..."
-    pip install --upgrade pip
-    pip install -r /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
-
-    # Run the diagnostics Python script
+    
+    # Run the diagnostics Python script (make sure you're in the correct directory)
     python /home/fluxuser/FluxCore-Diagnostics/py/diagnostics.py
 
 EOF
