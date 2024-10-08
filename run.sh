@@ -54,11 +54,13 @@ run_as_fluxuser() {
         exit 1
     fi
 
-    # # Install Python 3.12 if not installed
-    # if ! pyenv versions | grep -q "3.12.0"; then
-    #     echo "Installing Python 3.12..."
-    #     pyenv install 3.12.0
-    # fi
+    # Install Python 3.12 if not installed
+    if ! pyenv versions | grep -q "3.12.0"; then
+        echo "Installing Python 3.12..."
+        pyenv install 3.12.0
+    else
+        echo "python version already 3.12.0.... skipping"
+    fi
 
     # Create a virtual environment if it doesn't exist
     if [ ! -d "$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
@@ -70,8 +72,8 @@ run_as_fluxuser() {
     export PYENV_VIRTUALENV_DISABLE_PROMPT=1
     pyenv activate fluxcore-diagnostics-env
 
-    # # Run the diagnostics Python script
-    # python /home/fluxuser/FluxCore-Diagnostics/py/diagnostics.py
+    # Run the diagnostics Python script
+    python /home/fluxuser/FluxCore-Diagnostics/py/diagnostics.py
 
 EOF
 }
