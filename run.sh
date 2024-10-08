@@ -20,6 +20,12 @@ sudo_check() {
 run_as_fluxuser() {
     sudo -i -u fluxuser bash << 'EOF'
     
+    # Check if curl is installed
+    if ! command -v curl &> /dev/null; then
+        echo "curl not found. Please install it before running the script."
+        exit 1
+    fi
+
     # Ensure pyenv is properly configured
     export PYENV_ROOT="\$HOME/.pyenv"
     export PATH="\$PYENV_ROOT/bin:\$PATH"
