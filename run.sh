@@ -1,5 +1,24 @@
 #!/bin/bash
 
+# Function to manage Sudo
+sudo_check() {
+ echo "Checking if sudo requires a password..."
+ if sudo -n true 2>/dev/null; then
+    echo "Sudo does not require a password."
+ else
+    echo "Sudo requires a password. Please enter your password:"
+    sudo -v
+    if [ $? -ne 0 ]; then
+        echo "Incorrect password or sudo authentication failed."
+	echo -e ""
+        exit 1
+    fi
+ fi
+ echo -e ""
+}
+
+
+
 # Check if sudo is required
 sudo_check
 
