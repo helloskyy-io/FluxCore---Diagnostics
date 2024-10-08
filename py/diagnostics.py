@@ -1,43 +1,38 @@
+from rich.console import Console
+from rich.table import Table
 import subprocess
-import tkinter as tk
-import time
 
-# Function to check if Nvidia 550 drivers are installed
+console = Console()
+
 def check_nvidia_driver():
     try:
-        # Run nvidia-smi command and capture output
-        output = subprocess.check_output(["nvidia-smi"], universal_newlines=True)
-        if "550" in output:  # Simplified check
-            return True
+        # Run a simple shell command to check if the Nvidia driver is installed
+        result = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if result.returncode == 0:
+            return True, None  # Driver is installed
         else:
-            return False
-    except subprocess.CalledProcessError:
-        return False
+            return False, result.stderr.decode('utf-8')  # Return error message
+    except Exception as e:
+        return False, str(e)  # Catch and return the exception message
 
-# Function to run diagnostics and update UI
-def run_diagnostics():
-    label.config(text="Checking Nvidia 550 drivers...")
-    window.update()
-    time.sleep(1)  # Delay to give user time to read
+def main():
+    console.print("[bold cyan]Running diagnostics...[/bold cyan]")
 
-    if check_nvidia_driver():
-        button.config(bg="green", text="Success")
+    # Create a table for visualization
+    table = Table(title="Diagnostics Results")
+
+    table.add_column("Test", justify="left", style="cyan", no_wrap=True)
+    table.add_column("Result", justify="right", style="green")
+
+    # Run the Nvidia driver check
+    nvidia_installed, error_message = check_nvidia_driver()
+    if nvidia_installed:
+        table.add_row("Nvidia Driver", "[green]Installed[/green]")
     else:
-        button.config(bg="red", text="Failure")
-    
-    label.config(text="Nvidia 550 Driver Check Completed")
+        table.add_row("Nvidia Driver", f"[red]Not Installed: {error_message}[/red]")
 
-# Setup Tkinter window
-window = tk.Tk()
-window.title("Diagnostics")
+    console.print(table)
 
-label = tk.Label(window, text="Running diagnostics...", font=("Helvetica", 16))
-label.pack(pady=20)
+if __name__ == "__main__":
+    main()
 
-button = tk.Button(window, text="Pending", font=("Helvetica", 16), width=20, height=2)
-button.pack(pady=10)
-
-# Run diagnostics after window loads
-window.after(1000, run_diagnostics)  # Start diagnostics after a 1 second delay
-
-window.mainloop()
