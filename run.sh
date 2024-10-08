@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Function to manage sudo
+# Function to manage Sudo
 sudo_check() {
     echo "Checking if sudo requires a password..."
     if sudo -n true 2>/dev/null; then
@@ -16,48 +16,6 @@ sudo_check() {
     echo ""
 }
 
-# Function to install pyenv if not already installed
-install_pyenv() {
-    if ! command -v pyenv &> /dev/null; then
-        echo "pyenv not found. Installing pyenv..."
-        curl https://pyenv.run | bash
-        echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
-        echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
-        echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
-        echo 'eval "$(pyenv init -)"' >> ~/.bashrc
-        source ~/.bashrc
-    else
-        echo "pyenv is already installed."
-    fi
-}
-
-# Function to install Python 3.12 using pyenv
-install_python_version() {
-    if ! pyenv versions | grep -q "3.12.0"; then
-        echo "Installing Python 3.12..."
-        pyenv install 3.12.0
-    else
-        echo "Python 3.12 is already installed."
-    fi
-}
-
-# Function to create virtual environment
-create_virtualenv() {
-    if [ ! -d "$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
-        echo "Creating virtual environment..."
-        pyenv virtualenv 3.12.0 fluxcore-diagnostics-env
-    else
-        echo "Virtual environment already exists."
-    fi
-}
-
-# Function to install Python packages
-install_python_packages() {
-    echo "Installing required Python packages..."
-    pip install --upgrade pip
-    pip install -r /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
-}
-
 # Main function to run everything under fluxuser
 run_as_fluxuser() {
     sudo -u fluxuser bash << 'EOF'
@@ -71,20 +29,38 @@ run_as_fluxuser() {
     fi
 
     # Install pyenv if not already installed
-    $(install_pyenv)
+    if ! command -v pyenv &> /dev/null; then
+        echo "pyenv not found. Installing pyenv..."
+        curl https://pyenv.run | bash
+
+        # Add pyenv to bashrc for future shells
+        echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+        echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+        echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
+        echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+        source ~/.bashrc
+    fi
 
     # Install Python 3.12 if not installed
-    $(install_python_version)
+    if ! pyenv versions | grep -q "3.12.0"; then
+        echo "Installing Python 3.12..."
+        pyenv install 3.12.0
+    fi
 
     # Create a virtual environment if it doesn't exist
-    $(create_virtualenv)
+    if [ ! -d "$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
+        echo "Creating virtual environment..."
+        pyenv virtualenv 3.12.0 fluxcore-diagnostics-env
+    fi
 
     # Activate the virtual environment
     export PYENV_VIRTUALENV_DISABLE_PROMPT=1
     pyenv activate fluxcore-diagnostics-env
 
     # Install Python packages
-    $(install_python_packages)
+    echo "Installing required Python packages..."
+    pip install --upgrade pip
+    pip install -r /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
 
     # Run the diagnostics Python script
     python /home/fluxuser/FluxCore-Diagnostics/py/diagnostics.py
@@ -95,4 +71,3 @@ EOF
 # Main Execution
 sudo_check
 run_as_fluxuser
-
