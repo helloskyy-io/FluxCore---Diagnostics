@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo ./py/diagnostics.py
+sudo python3 ./py/diagnostics.py
