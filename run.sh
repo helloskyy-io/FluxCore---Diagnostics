@@ -30,6 +30,9 @@ install_dependencies() {
 # Function to install pyenv as fluxuser if not already installed
 install_pyenv() {
     sudo -i -u fluxuser bash << 'EOF'
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+
     if ! command -v pyenv &> /dev/null; then
         echo "pyenv not found or not properly installed. Cleaning up and reinstalling pyenv..."
 
@@ -51,6 +54,10 @@ install_pyenv() {
     else
         echo "pyenv already installed."
     fi
+
+    # Ensure pyenv is initialized in the current session
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
 EOF
 }
 
@@ -82,6 +89,8 @@ create_virtualenv() {
     if [ ! -d "$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
         echo "Creating virtual environment..."
         pyenv virtualenv 3.12.0 fluxcore-diagnostics-env
+    else
+        echo "Virtual environment already exists."
     fi
 EOF
 }
@@ -122,7 +131,14 @@ EOF
 sudo_check
 
 # Install system dependencies only if needed (on first install)
+sudo -i -u fluxuser bash << 'EOF'
 if ! pyenv versions | grep -q "3.12.0"; then
+    exit 1  # Signal that dependencies are needed
+else
+    exit 0  # Dependencies already installed
+fi
+EOF
+if [ $? -ne 0 ]; then
     install_dependencies
 fi
 
