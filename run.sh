@@ -36,9 +36,9 @@ sudo_check() {
         source ~/.bashrc
     fi
 
-    # # Ensure pyenv is properly configured for current session
-    # export PYENV_ROOT="$HOME/.pyenv"
-    # export PATH="$PYENV_ROOT/bin:$PATH"
+    # Ensure pyenv is properly configured for current session
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
 
     # Initialize pyenv in the current shell
     if command -v pyenv >/dev/null 2>&1; then
