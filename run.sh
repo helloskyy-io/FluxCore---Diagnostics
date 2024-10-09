@@ -123,7 +123,7 @@ run_diagnostics() {
     pyenv activate fluxcore-diagnostics-env
 
     echo "Running diagnostics..."
-    python /home/fluxuser/FluxCore-Diagnostics/py/diagnostics.py
+    python /home/fluxuser/FluxCore-Diagnostics/main.py
 EOF
 }
 
