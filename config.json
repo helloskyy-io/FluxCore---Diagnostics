@@ -9,7 +9,7 @@
     "tests": [
       {
         "type": "gpu_driver_test",
-        "description": "Testing for Nvidia Driver",
+        "description": "Testing for Nvidia Driver and Version",
         "expected_version": "550",
         "pass_result": "Installed",
         "fail_result": "Failed",
@@ -41,6 +41,19 @@
         "fail_result": "Not Loaded",
         "pass_recommendation": "None",
         "fail_recommendation": "Please reinstall Nvidia drivers or ensure the kernel modules are loaded",
+        "colors": {
+          "pass": "green",
+          "fail": "red"
+        }
+      },
+      {
+        "type": "fluxcore_service_test",
+        "description": "Testing for FluxCore Service",
+        "service_name": "fluxcore",
+        "pass_result": "Running",
+        "fail_result": "Not Running",
+        "pass_recommendation": "None",
+        "fail_recommendation": "Please start or restart the FluxCore service",
         "colors": {
           "pass": "green",
           "fail": "red"
