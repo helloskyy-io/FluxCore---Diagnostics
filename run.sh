@@ -18,13 +18,18 @@ sudo_check() {
 
 # Function to install system dependencies for Python build
 install_dependencies() {
-    echo "Installing development libraries required for Python build..."
-    sudo apt-get update
-    sudo apt-get install -y \
-        libssl-dev zlib1g-dev libbz2-dev \
-        libreadline-dev libsqlite3-dev libffi-dev \
-        liblzma-dev libncurses5-dev libncursesw5-dev \
-        build-essential
+    echo "Checking system dependencies..."
+    if ! dpkg -s build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev libncurses5-dev libncursesw5-dev >/dev/null 2>&1; then
+        echo "System dependencies missing. Installing..."
+        sudo apt-get update
+        sudo apt-get install -y \
+            libssl-dev zlib1g-dev libbz2-dev \
+            libreadline-dev libsqlite3-dev libffi-dev \
+            liblzma-dev libncurses5-dev libncursesw5-dev \
+            build-essential
+    else
+        echo "System dependencies are already installed."
+    fi
 }
 
 # Function to install pyenv as fluxuser if not already installed
@@ -33,33 +38,44 @@ install_pyenv() {
     export PYENV_ROOT="$HOME/.pyenv"
     export PATH="$PYENV_ROOT/bin:$PATH"
 
+    # Check if pyenv is already installed
     if ! command -v pyenv &> /dev/null; then
-        echo "pyenv not found or not properly installed. Cleaning up and reinstalling pyenv..."
+        echo "pyenv not found. Installing pyenv..."
 
         # Remove any existing pyenv directory to avoid conflicts
         sudo rm -rf /home/fluxuser/.pyenv
         
         # Install pyenv
         curl https://pyenv.run | bash
+    else
+        echo "pyenv is already installed."
+    fi
 
-        # Add pyenv to bashrc for future sessions (only needed on first install)
+    # Check if pyenv is already in the bashrc to avoid duplication
+    if ! grep -q 'pyenv init' ~/.bashrc; then
+        echo "Adding pyenv to .bashrc..."
+
+        # Append pyenv setup to bashrc, but preserve existing PATH
         echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
-        echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+        echo 'if [[ ":$PATH:" != *":$PYENV_ROOT/bin:"* ]]; then' >> ~/.bashrc
+        echo '    export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+        echo 'fi' >> ~/.bashrc
         echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
         echo 'eval "$(pyenv init -)"' >> ~/.bashrc
         echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bashrc
-
-        # Source bashrc to apply pyenv immediately
-        source ~/.bashrc
     else
-        echo "pyenv already installed."
+        echo "pyenv is already in .bashrc. Skipping..."
     fi
+
+    # Source bashrc to apply pyenv immediately
+    source ~/.bashrc
 
     # Ensure pyenv is initialized in the current session
     eval "$(pyenv init --path)"
     eval "$(pyenv init -)"
 EOF
 }
+
 
 # Function to install Python 3.12 if not installed
 install_python() {
@@ -107,8 +123,16 @@ install_python_packages() {
     # Upgrade pip
     pip install --upgrade pip
 
-    # Install required Python packages from pinned_reqs.txt
-    pip install -r /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
+    # Check and install required Python packages from pinned_reqs.txt
+    while read -r requirement; do
+        # Check if package is already installed
+        if ! pip show "$requirement" &> /dev/null; then
+            echo "Installing $requirement..."
+            pip install "$requirement"
+        else
+            echo "$requirement is already installed."
+        fi
+    done < /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
 EOF
 }
 
@@ -130,23 +154,24 @@ EOF
 # Main Execution Flow
 sudo_check
 
-# Install system dependencies only if needed (on first install)
+# Check if Python 3.12 is installed. If not, install dependencies and pyenv
 sudo -i -u fluxuser bash << 'EOF'
 if ! pyenv versions | grep -q "3.12.0"; then
-    exit 1  # Signal that dependencies are needed
+    echo "Python 3.12.0 is not installed. Proceeding with installation..."
+    exit 1  # Signal that dependencies and pyenv need to be installed
 else
-    exit 0  # Dependencies already installed
+    echo "Python 3.12.0 is already installed."
+    exit 0  # Python is installed, no further action needed
 fi
 EOF
+
 if [ $? -ne 0 ]; then
     install_dependencies
+    install_pyenv
+    install_python
+else
+    echo "All necessary components are already installed."
 fi
-
-# Install pyenv for fluxuser
-install_pyenv
-
-# Install Python 3.12 if not already installed
-install_python
 
 # Create virtual environment if not already created
 create_virtualenv
@@ -156,6 +181,7 @@ install_python_packages
 
 # Run diagnostics
 run_diagnostics
+
 
 
 
