@@ -571,6 +571,7 @@ run_diagnostics() {
 }
 
 
+### Main part of the script ###
 
 check_command "lsb_release" "lsb-release"
 check_command "wg-quick" "wireguard wireguard-tools udhcpc"
@@ -588,13 +589,31 @@ echo -e "${YELLOW}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo -e " Branch: ${GREEN}${BRANCH}${RESTORE}"
 echo -e " Ubuntu version: ${CYAN}${UBUNTU_VERSION}${RESTORE} Type: ${CYAN}${SYSTEM_TYPE}${RESTORE}"
 echo -e "${YELLOW}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${RESTORE}"
-echo -e "${CYAN} 1) Install FluxCore${RESTORE}"
-echo -e "${CYAN} 2) Uninstall FluxCore${RESTORE}"
-echo -e "${CYAN} 3) Fix Frankenstein Script${RESTORE}"
+
+# Dynamic option numbering
+option_number=1
+
+# Install FluxCore
+echo -e "${CYAN} ${option_number}) Install FluxCore${RESTORE}"
+option_number=$((option_number + 1))
+
+# Uninstall FluxCore
+echo -e "${CYAN} ${option_number}) Uninstall FluxCore${RESTORE}"
+option_number=$((option_number + 1))
+
+# Fix Frankenstein Script
+echo -e "${CYAN} ${option_number}) Fix Frankenstein Script${RESTORE}"
+option_number=$((option_number + 1))
+
+# Only add Hosts file management if system is Desktop
 if [[ "$SYSTEM_TYPE" == "Desktop" ]]; then
-  echo -e "${CYAN} 4) Hosts file management${RESTORE}"
+  echo -e "${CYAN} ${option_number}) Hosts file management${RESTORE}"
+  option_number=$((option_number + 1))
 fi
-echo -e "${CYAN} 5) Run Diagnostics${RESTORE}"
+
+# Run Diagnostics (always last)
+echo -e "${CYAN} ${option_number}) Run Diagnostics${RESTORE}"
+
 echo -e "${YELLOW}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${RESTORE}"
 read -rp " Pick an option and hit ENTER: "
 case "$REPLY" in
@@ -602,7 +621,6 @@ case "$REPLY" in
  		clear
 		sleep 1
 		daemon_setup
-
  ;;
  2) 
 		clear
@@ -615,16 +633,27 @@ case "$REPLY" in
 		fix_frankenstein
  ;;
  4)
- 
+    if [[ "$SYSTEM_TYPE" == "Desktop" ]]; then
  		clear
     sleep 1
-		host_file_manage	
+		host_file_manage
+    else
+    clear
+    sleep 1
+		run_diagnostics
+    fi
  ;;
  5)
- 
+    if [[ "$SYSTEM_TYPE" == "Desktop" ]]; then
  		clear
     sleep 1
-		run_diagnostics	
+		run_diagnostics
+    else
+    echo "Invalid option. Please try again."
+    fi
+ ;;
+ *)
+   echo "Invalid option. Please try again."
  ;;
  esac
  set -o history
