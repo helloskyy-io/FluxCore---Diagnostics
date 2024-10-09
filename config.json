@@ -32,7 +32,21 @@
           "pass": "green",
           "fail": "red"
         }
+      },
+      {
+        "type": "nvidia_kernel_modules",
+        "description": "Testing for Nvidia Kernel Modules",
+        "modules": ["nvidia", "nvidia_modeset", "nvidia_drm", "nvidia_uvm"],
+        "pass_result": "Loaded",
+        "fail_result": "Not Loaded",
+        "pass_recommendation": "None",
+        "fail_recommendation": "Please reinstall Nvidia drivers or ensure the kernel modules are loaded",
+        "colors": {
+          "pass": "green",
+          "fail": "red"
+        }
       }
     ]
   }
+  
   
