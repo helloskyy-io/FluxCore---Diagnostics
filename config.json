@@ -74,7 +74,7 @@
       },
       {
         "type": "fluxcore_version_test",
-        "description": "Displaying Installed FluxCore Version",
+        "description": "Testing for Installed FluxCore Version",
         "pass_result": "Version Retrieved",
         "fail_result": "Could not retrieve version",
         "pass_recommendation": "None",
@@ -83,7 +83,21 @@
           "pass": "green",
           "fail": "red"
         }
+      },
+      {
+        "type": "rancher_service_test",
+        "description": "Testing for Rancher Service (rke2-agent)",
+        "service_name": "rke2-agent",
+        "pass_result": "Running",
+        "fail_result": "Not Running",
+        "pass_recommendation": "None",
+        "fail_recommendation": "Please start or restart the Rancher agent service",
+        "colors": {
+          "pass": "green",
+          "fail": "red"
+        }
       }
     ]
   }
+  
   
