@@ -35,46 +35,57 @@ install_dependencies() {
 # Function to install pyenv as fluxuser if not already installed
 install_pyenv() {
     sudo -i -u fluxuser bash << 'EOF'
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
 
+    export PYENV_ROOT="\$HOME/.pyenv"
+    
     # Check if pyenv is already installed
     if ! command -v pyenv &> /dev/null; then
         echo "pyenv not found. Installing pyenv..."
 
+        # Temporarily add pyenv to PATH for installation
+        export PATH="\$PYENV_ROOT/bin:\$PATH"
+        echo "Temporarily added pyenv to PATH for installation."
+
         # Remove any existing pyenv directory to avoid conflicts
         sudo rm -rf /home/fluxuser/.pyenv
-        
+        echo "Removed any previous pyenv installation."
+
         # Install pyenv
         curl https://pyenv.run | bash
+        echo "pyenv installation complete."
+
     else
         echo "pyenv is already installed."
     fi
 
-    # Check if pyenv is already in the bashrc to avoid duplication
-    if ! grep -q 'pyenv init' ~/.bashrc; then
-        echo "Adding pyenv to .bashrc..."
-
-        # Append pyenv setup to bashrc, but preserve existing PATH
-        echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
-        echo 'if [[ ":$PATH:" != *":$PYENV_ROOT/bin:"* ]]; then' >> ~/.bashrc
-        echo '    export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
-        echo 'fi' >> ~/.bashrc
-        echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
-        echo 'eval "$(pyenv init -)"' >> ~/.bashrc
-        echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bashrc
-    else
-        echo "pyenv is already in .bashrc. Skipping..."
+    # Set up pyenv hooks to manage PATH automatically
+    if [ ! -d "\$PYENV_ROOT/pyenv-hooks" ]; then
+        echo "Setting up pyenv hooks..."
+        mkdir -p "\$PYENV_ROOT/pyenv-hooks"
     fi
 
-    # Source bashrc to apply pyenv immediately
-    source ~/.bashrc
+    # Create the pyenv hook script to dynamically adjust PATH
+    echo 'export PATH="\$PYENV_ROOT/bin:\$PYENV_ROOT/shims:\$PATH"' > "\$PYENV_ROOT/pyenv-hooks/fluxcore-diagnostics-path.sh"
+    chmod +x "\$PYENV_ROOT/pyenv-hooks/fluxcore-diagnostics-path.sh"
+    echo "pyenv PATH hook configured."
 
-    # Ensure pyenv is initialized in the current session
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
+    # Ensure pyenv hook is sourced upon environment activation
+    mkdir -p "\$PYENV_ROOT/plugins/pyenv-hooks"
+    echo 'source "\$PYENV_ROOT/pyenv-hooks/fluxcore-diagnostics-path.sh"' > "\$PYENV_ROOT/plugins/pyenv-hooks/activate"
+    echo "pyenv environment activation hook created."
+
+    # Check if the hook is working by testing pyenv
+    echo "Testing pyenv availability..."
+    eval "\$(pyenv init --path)"
+    eval "\$(pyenv init -)"
+    if command -v pyenv &> /dev/null; then
+        echo "pyenv is successfully available in the current session."
+    else
+        echo "pyenv is NOT available. Something went wrong during the setup."
+    fi
 EOF
 }
+
 
 
 # Function to install Python 3.12 if not installed
