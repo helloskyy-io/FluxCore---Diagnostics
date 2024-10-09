@@ -8,6 +8,7 @@ from tests.fluxcore_service_test import check_fluxcore_service
 from tests.fluxcore_webserver_test import check_webserver
 from tests.fluxcore_version_test import check_fluxcore_version
 from tests.rancher_service_test import check_rancher_service
+from tests.kubernetes_service_test import check_kubernetes_client
 
 # Load the configuration from config.json
 with open("/home/fluxuser/FluxCore-Diagnostics/config.json") as config_file:
@@ -50,6 +51,9 @@ def run_diagnostics():
         elif test["type"] == "rancher_service_test":
             test_name = test["description"]
             result, recommendation, color = check_rancher_service(test)
+        elif test["type"] == "kubernetes_service_test":
+            test_name = test["description"]
+            result, recommendation, color = check_kubernetes_client(test)
 
         # Color the result based on pass or fail
         result_colored = f'[{color}]{result}[/{color}]'
@@ -63,3 +67,4 @@ def run_diagnostics():
 # Run diagnostics
 if __name__ == "__main__":
     run_diagnostics()
+

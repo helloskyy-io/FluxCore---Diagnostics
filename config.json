@@ -96,6 +96,18 @@
           "pass": "green",
           "fail": "red"
         }
+      },
+      {
+        "type": "kubernetes_service_test",
+        "description": "Testing for Kubernetes Client (kubectl)",
+        "pass_result": "kubectl is functioning",
+        "fail_result": "kubectl is not responsive",
+        "pass_recommendation": "None",
+        "fail_recommendation": "Please ensure Kubernetes is properly installed and configured",
+        "colors": {
+          "pass": "green",
+          "fail": "red"
+        }
       }
     ]
   }
