@@ -4,7 +4,7 @@
             "pass": "green",
             "fail": "red"
         },
-        "header_color": "light_sky_blue1"
+        "header_color": "sky_blue1"
     },
     "tests": [
         {
