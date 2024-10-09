@@ -1,4 +1,10 @@
 {
+    "table_settings": {
+        "result_colors": {
+            "pass": "green",
+            "fail": "red"
+        }
+    },
     "tests": [
         {
             "name": "Nvidia Driver",
