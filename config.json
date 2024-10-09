@@ -71,8 +71,19 @@
           "pass": "green",
           "fail": "red"
         }
+      },
+      {
+        "type": "fluxcore_version_test",
+        "description": "Displaying Installed FluxCore Version",
+        "pass_result": "Version Retrieved",
+        "fail_result": "Could not retrieve version",
+        "pass_recommendation": "None",
+        "fail_recommendation": "Please ensure FluxCore is installed properly",
+        "colors": {
+          "pass": "green",
+          "fail": "red"
+        }
       }
     ]
   }
-  
   
