@@ -58,6 +58,19 @@
           "pass": "green",
           "fail": "red"
         }
+      },
+      {
+        "type": "fluxcore_webserver_test",
+        "description": "Testing for FluxCore Web Server",
+        "port": 18180,
+        "pass_result": "Web server is running",
+        "fail_result": "Web server is not running",
+        "pass_recommendation": "None",
+        "fail_recommendation": "Please restart the FluxCore web server",
+        "colors": {
+          "pass": "green",
+          "fail": "red"
+        }
       }
     ]
   }

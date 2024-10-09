@@ -5,6 +5,7 @@ from tests.gpu_driver_tests import check_nvidia_driver_version
 from tests.cuda_installed_test import check_cuda_installed
 from tests.nvidia_kernel_modules import check_nvidia_kernel_modules
 from tests.fluxcore_service_test import check_fluxcore_service
+from tests.fluxcore_webserver_test import check_webserver
 
 # Load the configuration from config.json
 with open("/home/fluxuser/FluxCore-Diagnostics/config.json") as config_file:
@@ -38,6 +39,9 @@ def run_diagnostics():
         elif test["type"] == "fluxcore_service_test":
             test_name = test["description"]
             result, recommendation, color = check_fluxcore_service(test)
+        elif test["type"] == "fluxcore_webserver_test":
+            test_name = test["description"]
+            result, recommendation, color = check_webserver(test)
         
         # Color the result based on pass or fail
         result_colored = f'[{color}]{result}[/{color}]'
