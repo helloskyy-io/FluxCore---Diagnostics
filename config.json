@@ -1,20 +1,25 @@
 {
     "table_settings": {
-        "result_colors": {
-            "pass": "green",
-            "fail": "red"
-        },
-        "header_color": "sky_blue1"
+      "result_colors": {
+        "pass": "green",
+        "fail": "red"
+      },
+      "header_color": "dodger_blue1"
     },
     "tests": [
-        {
-            "name": "Nvidia Driver",
-            "description": "Testing for Nvidia Driver",
-            "expected_version": "550",
-            "pass_result": "Installed",
-            "fail_result": "Failed",
-            "pass_recommendation": "None",
-            "fail_recommendation": "Please purge and reinstall Nvidia driver 550"
+      {
+        "type": "gpu_driver_test",
+        "description": "Testing for Nvidia Driver",
+        "expected_version": "550",
+        "pass_result": "Installed",
+        "fail_result": "Failed",
+        "pass_recommendation": "None",
+        "fail_recommendation": "Please purge and reinstall Nvidia driver 550",
+        "colors": {
+          "pass": "green",
+          "fail": "red"
         }
+      }
     ]
-}
+  }
+  

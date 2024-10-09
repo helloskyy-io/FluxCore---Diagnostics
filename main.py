@@ -1,7 +1,7 @@
 import json
 from rich.console import Console
 from rich.table import Table
-from tests.gpu_tests import check_nvidia_driver_version
+from tests.gpu_driver_tests import check_nvidia_driver_version
 
 # Load the configuration from config.json
 with open("/home/fluxuser/FluxCore-Diagnostics/config.json") as config_file:
@@ -21,9 +21,9 @@ def run_diagnostics():
     table.add_column(f"[{header_color}]Result[/]", justify="center")
     table.add_column(f"[{header_color}]Recommendation[/]", justify="center")
 
-    # Run GPU test
+    # Run GPU driver test
     for test in config["tests"]:
-        if test["type"] == "gpu":
+        if test["type"] == "gpu_driver_test":
             test_name = f'{test["description"]} {test["expected_version"]}'
             result, recommendation, color = check_nvidia_driver_version(test)
 
