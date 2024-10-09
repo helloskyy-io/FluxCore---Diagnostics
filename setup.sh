@@ -551,24 +551,27 @@ run_diagnostics() {
     # Define the target directory in the fluxuser's home
     TARGET_DIR="/home/fluxuser/FluxCore-Diagnostics"
     
-    # If the directory does not exist, clone the repository
+    # Switch to the fluxuser and check if the directory exists
+    sudo -i -u fluxuser bash << EOF
     if [ ! -d "$TARGET_DIR" ]; then
         echo "Directory doesn't exist. Cloning the repository..."
-        sudo git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "$TARGET_DIR"
+        git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "$TARGET_DIR"
     else
         echo "Directory exists. Updating repository..."
-        sudo git -C "$TARGET_DIR" pull
+        git -C "$TARGET_DIR" pull
     fi
     
     # Make sure run.sh is executable
     if [ -f "$TARGET_DIR/run.sh" ]; then
-        sudo chmod +x "$TARGET_DIR/run.sh"
+        chmod +x "$TARGET_DIR/run.sh"
         # Run the script
-        sudo bash "$TARGET_DIR/run.sh"
+        bash "$TARGET_DIR/run.sh"
     else
         echo "run.sh not found in the repository."
     fi
+EOF
 }
+
 
 
 ### Main part of the script ###
