@@ -11,6 +11,7 @@ console = Console()
 
 # Extract table settings from the JSON
 result_colors = config["table_settings"]["result_colors"]
+header_color = config["table_settings"]["header_color"]
 
 def check_nvidia_driver_version(test_config):
     # Get the installed Nvidia driver version
@@ -35,10 +36,10 @@ def check_nvidia_driver_version(test_config):
 def run_diagnostics():
     table = Table(title="Diagnostics Results")
 
-    # Define table columns
-    table.add_column("Test", justify="left")
-    table.add_column("Result", justify="center")
-    table.add_column("Recommendation", justify="center")
+    # Define table columns with header color
+    table.add_column(f"[{header_color}]Test[/]", justify="left")
+    table.add_column(f"[{header_color}]Result[/]", justify="center")
+    table.add_column(f"[{header_color}]Recommendation[/]", justify="center")
 
     # Iterate over the tests in the JSON config
     for test in config["tests"]:
@@ -56,3 +57,4 @@ def run_diagnostics():
 
 # Run diagnostics
 run_diagnostics()
+

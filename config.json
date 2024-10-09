@@ -3,7 +3,8 @@
         "result_colors": {
             "pass": "green",
             "fail": "red"
-        }
+        },
+        "header_color": "light_sky_blue1"
     },
     "tests": [
         {
