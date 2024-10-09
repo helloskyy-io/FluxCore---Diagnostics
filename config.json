@@ -1,11 +1,13 @@
 {
-    "nvidia_driver": {
-      "test": "Testing for Nvidia Driver",
-      "expected_version": "550",
-      "pass_result": "Installed",
-      "fail_result": "Failed",
-      "pass_recommendation": "None",
-      "fail_recommendation": "Please purge and reinstall Nvidia driver 550"
-    }
-  }
-  
+    "tests": [
+        {
+            "name": "Nvidia Driver",
+            "description": "Testing for Nvidia Driver",
+            "expected_version": "550",
+            "pass_result": "Installed",
+            "fail_result": "Failed",
+            "pass_recommendation": "None",
+            "fail_recommendation": "Please purge and reinstall Nvidia driver 550"
+        }
+    ]
+}
