@@ -146,6 +146,20 @@ install_python_packages() {
     done < /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
 
     echo "All required packages processed."
+
+    # Verify that 'rich' was installed
+    echo "Verifying installation of 'rich'..."
+    pip show rich
+    if [ $? -ne 0 ]; then
+        echo "Error: 'rich' is still not installed. Exiting..."
+        exit 1
+    else
+        echo "'rich' is installed successfully."
+    fi
+
+    # List installed packages
+    echo "Listing installed packages in the environment..."
+    pip list
 }
 
 
