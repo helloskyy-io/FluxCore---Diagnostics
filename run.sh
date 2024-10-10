@@ -140,7 +140,7 @@ run_diagnostics() {
 
 # Main Execution Flow
 sudo_check
-sudo su - fluxuser << 'EOF'
+# sudo su - fluxuser << 'EOF'
 cd /home/fluxuser
 
 # Check if Python 3.12 is installed via pyenv. If not, install dependencies and pyenv
@@ -158,7 +158,6 @@ install_python_packages
 
 # Run diagnostics
 run_diagnostics
-EOF
 
 
 
