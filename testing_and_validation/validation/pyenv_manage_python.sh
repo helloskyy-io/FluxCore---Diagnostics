@@ -28,5 +28,11 @@ if [ $? -eq 0 ]; then
 else
     echo "Failed to activate the virtual environment."
     exit 1
+
 fi
+
+# Deactivate the environment after the test
+pyenv deactivate
+echo "Virtual environment deactivated."
+
 EOF
