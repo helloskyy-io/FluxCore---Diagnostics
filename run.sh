@@ -67,20 +67,10 @@ install_pyenv() {
     chmod +x "$PYENV_ROOT/pyenv-hooks/fluxcore-diagnostics-path.sh"
     mkdir -p "$PYENV_ROOT/plugins/pyenv-hooks"
     echo 'source "$PYENV_ROOT/pyenv-hooks/fluxcore-diagnostics-path.sh"' > "$PYENV_ROOT/plugins/pyenv-hooks/activate"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
-    if ! command -v pyenv &> /dev/null; then
-        echo "Error: pyenv is NOT available. Exiting setup."
-        exit 1
-    fi
 }
 
 # Function to install Python 3.12 if not installed
 install_python() {
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
     if ! pyenv versions | grep -q "3.12.0"; then
         pyenv install 3.12.0
         if ! pyenv versions | grep -q "3.12.0"; then
@@ -92,25 +82,19 @@ install_python() {
 
 # Function to create a virtual environment if it doesn't exist
 create_virtualenv() {
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
     if [ ! -d "$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
         pyenv virtualenv 3.12.0 fluxcore-diagnostics-env
         if [ ! -d "$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
             echo "Error: Failed to create virtual environment. Exiting..."
             exit 1
         fi
+    else
+        echo "Virtual environment already exists."
     fi
 }
 
 # Function to install Python packages inside the virtualenv
 install_python_packages() {
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
     pyenv activate fluxcore-diagnostics-env
     pip install --upgrade pip
     while read -r requirement; do
@@ -119,17 +103,17 @@ install_python_packages() {
             if ! pip show "$requirement" &> /dev/null; then
                 echo "Error: Failed to install $requirement. Exiting..."
                 exit 1
+            else
+                echo "$requirement installed successfully."
             fi
+        else
+            echo "$requirement is already installed."
         fi
     done < /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
 }
 
 # Function to activate the virtualenv and run diagnostics
 run_diagnostics() {
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
     pyenv activate fluxcore-diagnostics-env
     if [ $? -ne 0 ]; then
         echo "Error: Failed to activate the virtual environment. Exiting..."
@@ -140,8 +124,15 @@ run_diagnostics() {
 
 # Main Execution Flow
 sudo_check
-# sudo su - fluxuser << 'EOF'
+
 cd /home/fluxuser
+
+# Initialize pyenv for the session once
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
 
 # Check if Python 3.12 is installed via pyenv. If not, install dependencies and pyenv
 if ! pyenv versions | grep -q "3.12.0"; then
@@ -158,6 +149,7 @@ install_python_packages
 
 # Run diagnostics
 run_diagnostics
+
 
 
 
