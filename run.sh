@@ -163,6 +163,7 @@ install_python_packages() {
 }
 
 
+
 # Function to activate the virtualenv and run diagnostics
 run_diagnostics() {
     pyenv activate fluxcore-diagnostics-env
