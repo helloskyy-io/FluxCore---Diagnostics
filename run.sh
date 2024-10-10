@@ -96,21 +96,58 @@ create_virtualenv() {
 # Function to install Python packages inside the virtualenv
 install_python_packages() {
     pyenv activate fluxcore-diagnostics-env
+    
+    # Debug output to show the virtual environment activation
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to activate the virtual environment."
+        exit 1
+    else
+        echo "Virtual environment activated successfully."
+    fi
+
+    # Upgrade pip
+    echo "Upgrading pip..."
     pip install --upgrade pip
+    
+    # Check if the pinned_reqs.txt file exists and has content
+    if [ ! -f /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt ]; then
+        echo "Error: pinned_reqs.txt file not found!"
+        exit 1
+    fi
+
+    if [ ! -s /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt ]; then
+        echo "Error: pinned_reqs.txt is empty!"
+        exit 1
+    fi
+    
+    # Display the contents of the pinned_reqs.txt file for debugging
+    echo "Contents of pinned_reqs.txt:"
+    cat /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
+
+    # Loop through each line in the pinned_reqs.txt file
     while read -r requirement; do
-        if ! pip show "$requirement" &> /dev/null; then
-            pip install "$requirement"
+        if [ -n "$requirement" ]; then  # Add a check to skip empty lines
+            echo "Checking if $requirement is already installed..."
             if ! pip show "$requirement" &> /dev/null; then
-                echo "Error: Failed to install $requirement. Exiting..."
-                exit 1
+                echo "Installing $requirement..."
+                pip install "$requirement"
+                if ! pip show "$requirement" &> /dev/null; then
+                    echo "Error: Failed to install $requirement. Exiting..."
+                    exit 1
+                else
+                    echo "$requirement installed successfully."
+                fi
             else
-                echo "$requirement installed successfully."
+                echo "$requirement is already installed."
             fi
         else
-            echo "$requirement is already installed."
+            echo "Skipped an empty line in pinned_reqs.txt."
         fi
     done < /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
+
+    echo "All required packages processed."
 }
+
 
 # Function to activate the virtualenv and run diagnostics
 run_diagnostics() {
