@@ -108,7 +108,7 @@ install_python_packages() {
     # Upgrade pip
     echo "Upgrading pip..."
     pip install --upgrade pip
-    
+
     # Check if the pinned_reqs.txt file exists and has content
     if [ ! -f /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt ]; then
         echo "Error: pinned_reqs.txt file not found!"
@@ -119,48 +119,26 @@ install_python_packages() {
         echo "Error: pinned_reqs.txt is empty!"
         exit 1
     fi
-    
-    # Display the contents of the pinned_reqs.txt file for debugging
-    echo "Contents of pinned_reqs.txt:"
-    cat /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
 
-    # Loop through each line in the pinned_reqs.txt file
-    while read -r requirement; do
-        if [ -n "$requirement" ]; then  # Add a check to skip empty lines
-            echo "Checking if $requirement is already installed..."
-            if ! pip show "$requirement" &> /dev/null; then
-                echo "Installing $requirement..."
-                pip install "$requirement"
-                if ! pip show "$requirement" &> /dev/null; then
-                    echo "Error: Failed to install $requirement. Exiting..."
-                    exit 1
-                else
-                    echo "$requirement installed successfully."
-                fi
-            else
-                echo "$requirement is already installed."
-            fi
-        else
-            echo "Skipped an empty line in pinned_reqs.txt."
-        fi
-    done < /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
+    # Install the packages using pip -r (letting pip handle the whole file)
+    echo "Installing required packages from pinned_reqs.txt..."
+    pip install -r /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
 
-    echo "All required packages processed."
-
-    # Verify that 'rich' was installed
+    # Verify the installation of 'rich' (or any other package you care about)
     echo "Verifying installation of 'rich'..."
     pip show rich
     if [ $? -ne 0 ]; then
         echo "Error: 'rich' is still not installed. Exiting..."
         exit 1
     else
-        echo "'rich' is installed successfully."
+        echo "'rich' installed successfully."
     fi
 
-    # List installed packages
+    # List installed packages for debugging
     echo "Listing installed packages in the environment..."
     pip list
 }
+
 
 
 
