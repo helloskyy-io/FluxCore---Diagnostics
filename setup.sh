@@ -550,47 +550,41 @@ run_diagnostics() {
 
     # Define the target directory in the fluxuser's home
     TARGET_DIR="/home/fluxuser/FluxCore-Diagnostics"
+    BACKUP_DIR="/home/fluxuser/FluxCore-Diagnostics-backup-$(date +%Y%m%d%H%M%S)"
 
-    # Check if the directory exists and handle potential local changes
+    # Check if the directory exists
     if [ -d "$TARGET_DIR" ]; then
         echo "Directory exists. Attempting to update the repository..."
-        
+
         # Try to pull the latest changes
         if ! sudo -i -u fluxuser git -C "$TARGET_DIR" pull; then
-            echo "Error: Local changes are preventing a successful git pull."
+            echo -e "\e[31mERROR: Local changes detected preventing a successful git pull.\e[0m"
+            echo -e "\e[31mMoving $TARGET_DIR to $BACKUP_DIR to prevent loss of local changes.\e[0m"
+            
+            # Move the directory to a backup location
+            sudo mv "$TARGET_DIR" "$BACKUP_DIR"
 
-            # Prompt the user if they want to force reset the local changes
-            read -p "Do you want to override the local changes? [y/N]: " user_input
-            if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
-                echo "Resetting local changes..."
-                sudo -i -u fluxuser bash <<EOF
-                git -C "$TARGET_DIR" fetch --all
-                git -C "$TARGET_DIR" reset --hard origin/main
-EOF
-                echo "Local changes have been overridden. Repository updated."
-            else
-                echo "Aborted. Please resolve local changes and try again."
-                exit 1
-            fi
-        else
-            echo "Repository successfully updated."
+            # Inform the user
+            echo -e "\e[32mBackup completed. Cloning a fresh copy of the repository...\e[0m"
         fi
-    else
-        # Clone the repository if the directory doesn't exist
-        echo "Directory doesn't exist. Cloning the repository..."
+    fi
+
+    # Clone the repository afresh
+    if [ ! -d "$TARGET_DIR" ]; then
+        echo "Cloning the repository..."
         sudo -i -u fluxuser git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "$TARGET_DIR"
     fi
     
     # Make sure run.sh is executable
-    sudo -i -u fluxuser bash <<EOF
     if [ -f "$TARGET_DIR/run.sh" ]; then
-        chmod +x "$TARGET_DIR/run.sh"
-        bash "$TARGET_DIR/run.sh"
+        sudo chmod +x "$TARGET_DIR/run.sh"
+        # Run the script
+        sudo -i -u fluxuser bash "$TARGET_DIR/run.sh"
     else
         echo "run.sh not found in the repository."
     fi
-EOF
 }
+
 
 
 
