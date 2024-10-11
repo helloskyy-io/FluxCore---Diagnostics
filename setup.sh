@@ -552,7 +552,8 @@ run_diagnostics() {
     TARGET_DIR="/home/fluxuser/FluxCore-Diagnostics"
     BACKUP_DIR="/home/fluxuser/FluxCore-Diagnostics-backup-$(date +%Y%m%d%H%M%S)"
 
-    # Check if the directory exists
+    # Switch to the fluxuser and check if the directory exists
+    sudo -i -u fluxuser bash << 'EOF'
     if [ -d "$TARGET_DIR" ]; then
         echo "Directory exists. Attempting to update the repository..."
 
@@ -583,6 +584,7 @@ run_diagnostics() {
     else
         echo "run.sh not found in the repository."
     fi
+EOF
 }
 
 
