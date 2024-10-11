@@ -548,25 +548,24 @@ run_diagnostics() {
     # Check for sudo permissions
     sudo_check
 
-    # Define the target directory in the fluxuser's home
-    TARGET_DIR="/home/fluxuser/FluxCore-Diagnostics"
-    
     # Switch to the fluxuser and check if the directory exists
-    sudo -i -u fluxuser bash << 'EOF'
-    if [ ! -d "$TARGET_DIR" ]; then
+    sudo -i -u fluxuser bash << EOF
+    TARGET_DIR="/home/fluxuser/FluxCore-Diagnostics"  # Define the target directory inside the sudo block
+
+    if [ ! -d "\$TARGET_DIR" ]; then
         echo "Directory doesn't exist. Cloning the repository..."
-        git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "$TARGET_DIR"
+        git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "\$TARGET_DIR"
     else
         echo "Directory exists. Attempting to update the repository..."
-        if ! git -C "$TARGET_DIR" pull; then
+        if ! git -C "\$TARGET_DIR" pull; then
             echo "Error: Could not update repository due to local changes."
 
             # Prompt the user for confirmation to reset the repo
             read -p "Would you like to override the local directory and reset to the latest remote version? (y/n): " answer
-            if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
+            if [[ "\$answer" == "y" || "\$answer" == "Y" ]]; then
                 echo "Resetting the repository and discarding local changes..."
-                git -C "$TARGET_DIR" fetch --all
-                git -C "$TARGET_DIR" reset --hard origin/main
+                git -C "\$TARGET_DIR" fetch --all
+                git -C "\$TARGET_DIR" reset --hard origin/main
                 echo "Repository reset to the latest version."
             else
                 echo "Aborted. Please resolve local changes and try again."
@@ -576,15 +575,16 @@ run_diagnostics() {
     fi
     
     # Make sure run.sh is executable
-    if [ -f "$TARGET_DIR/run.sh" ]; then
-        chmod +x "$TARGET_DIR/run.sh"
+    if [ -f "\$TARGET_DIR/run.sh" ]; then
+        chmod +x "\$TARGET_DIR/run.sh"
         # Run the script
-        bash "$TARGET_DIR/run.sh"
+        bash "\$TARGET_DIR/run.sh"
     else
         echo "run.sh not found in the repository."
     fi
 EOF
 }
+
 
 
 
