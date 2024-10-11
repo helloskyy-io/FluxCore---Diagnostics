@@ -548,49 +548,49 @@ run_diagnostics() {
     # Check for sudo permissions
     sudo_check
 
-    # Switch to the fluxuser and check if the directory exists
-    sudo -i -u fluxuser bash << EOF
-    TARGET_DIR="/home/fluxuser/FluxCore-Diagnostics"  # Define the target directory inside the sudo block
+    # Define the target directory in the fluxuser's home
+    TARGET_DIR="/home/fluxuser/FluxCore-Diagnostics"
 
-    if [ ! -d "\$TARGET_DIR" ]; then
-        echo "Directory doesn't exist. Cloning the repository..."
-        git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "\$TARGET_DIR"
-    else
+    # Check if the directory exists and handle potential local changes
+    if [ -d "$TARGET_DIR" ]; then
         echo "Directory exists. Attempting to update the repository..."
-        git_output=\$(git -C "\$TARGET_DIR" pull 2>&1)
-
-        if [[ "\$git_output" == *"Your local changes to the following files would be overwritten"* ]]; then
+        
+        # Try to pull the latest changes
+        if ! sudo -i -u fluxuser git -C "$TARGET_DIR" pull; then
             echo "Error: Local changes are preventing a successful git pull."
-        else
-            echo "Error: git pull failed. Here's the error output:"
-            echo "\$git_output"
-        fi
 
-        # Prompt the user for confirmation to reset the repo, regardless of the error
-        read -p "Would you like to override the local directory and reset to the latest remote version? (y/n): " answer
-        if [[ "\$answer" == "y" || "\$answer" == "Y" ]]; then
-            echo "Resetting the repository and discarding local changes..."
-            git -C "\$TARGET_DIR" fetch --all
-            git -C "\$TARGET_DIR" reset --hard origin/main
-            echo "Repository reset to the latest version."
+            # Prompt the user if they want to force reset the local changes
+            read -p "Do you want to override the local changes? [y/N]: " user_input
+            if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
+                echo "Resetting local changes..."
+                sudo -i -u fluxuser bash <<EOF
+                git -C "$TARGET_DIR" fetch --all
+                git -C "$TARGET_DIR" reset --hard origin/main
+EOF
+                echo "Local changes have been overridden. Repository updated."
+            else
+                echo "Aborted. Please resolve local changes and try again."
+                exit 1
+            fi
         else
-            echo "Aborted. Please resolve issues and try again."
-            exit 1  # Exit to avoid further actions
+            echo "Repository successfully updated."
         fi
+    else
+        # Clone the repository if the directory doesn't exist
+        echo "Directory doesn't exist. Cloning the repository..."
+        sudo -i -u fluxuser git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "$TARGET_DIR"
     fi
     
     # Make sure run.sh is executable
-    if [ -f "\$TARGET_DIR/run.sh" ]; then
-        chmod +x "\$TARGET_DIR/run.sh"
-        # Run the script
-        bash "\$TARGET_DIR/run.sh"
+    sudo -i -u fluxuser bash <<EOF
+    if [ -f "$TARGET_DIR/run.sh" ]; then
+        chmod +x "$TARGET_DIR/run.sh"
+        bash "$TARGET_DIR/run.sh"
     else
         echo "run.sh not found in the repository."
     fi
 EOF
 }
-
-
 
 
 
