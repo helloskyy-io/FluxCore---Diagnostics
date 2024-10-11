@@ -40,11 +40,13 @@ install_dependencies() {
 
 # Function to install pyenv if not already installed
 install_pyenv() {
-    export PYENV_ROOT="$HOME/.pyenv"
     if ! command -v pyenv &> /dev/null; then
         echo "pyenv not found. Installing pyenv..."
-        export PATH="$PYENV_ROOT/bin:$PATH"
+
+        # Remove any existing pyenv to avoid conflicts
         sudo rm -rf /home/fluxuser/.pyenv
+
+        # Install pyenv using the official script
         curl https://pyenv.run | bash
         if [ $? -ne 0 ]; then
             echo "Error: pyenv installation failed."
@@ -125,9 +127,6 @@ install_python_packages() {
     echo "Listing installed packages in the environment..."
     pip list
 }
-
-
-
 
 # Function to activate the virtualenv and run diagnostics
 run_diagnostics() {
