@@ -54,19 +54,6 @@ install_pyenv() {
     else
         echo "pyenv is already installed."
     fi
-
-    # Set up pyenv hooks
-    if [ ! -d "$PYENV_ROOT/pyenv-hooks" ]; then
-        mkdir -p "$PYENV_ROOT/pyenv-hooks"
-        if [ $? -ne 0 ]; then
-            echo "Error: Failed to create pyenv hooks directory."
-            exit 1
-        fi
-    fi
-    echo 'export PATH="$PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH"' > "$PYENV_ROOT/pyenv-hooks/fluxcore-diagnostics-path.sh"
-    chmod +x "$PYENV_ROOT/pyenv-hooks/fluxcore-diagnostics-path.sh"
-    mkdir -p "$PYENV_ROOT/plugins/pyenv-hooks"
-    echo 'source "$PYENV_ROOT/pyenv-hooks/fluxcore-diagnostics-path.sh"' > "$PYENV_ROOT/plugins/pyenv-hooks/activate"
 }
 
 # Function to install Python 3.12 if not installed
