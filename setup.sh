@@ -548,12 +548,15 @@ run_diagnostics() {
     # Check for sudo permissions
     sudo_check
 
-    # Define the target directory in the fluxuser's home
-    TARGET_DIR="/home/fluxuser/FluxCore-Diagnostics"
-    BACKUP_DIR="/home/fluxuser/FluxCore-Diagnostics-backup-$(date +%Y%m%d%H%M%S)"
+  
+    
 
     # Switch to the fluxuser and check if the directory exists
     sudo -i -u fluxuser bash << 'EOF'
+    
+    TARGET_DIR="/home/fluxuser/FluxCore-Diagnostics"
+    BACKUP_DIR="/home/fluxuser/FluxCore-Diagnostics-backup-$(date +%Y%m%d%H%M%S)"
+
     if [ -d "$TARGET_DIR" ]; then
         echo "Directory exists. Attempting to update the repository..."
 
