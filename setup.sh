@@ -580,10 +580,8 @@ run_diagnostics() {
         git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "$TARGET_DIR"
     fi
     
-    # Make sure run.sh is executable
+    # Run the script directly
     if [ -f "$TARGET_DIR/run.sh" ]; then
-        chmod +x "$TARGET_DIR/run.sh"
-        # Run the script
         bash "$TARGET_DIR/run.sh"
     else
         echo "run.sh not found in the repository."

@@ -52,11 +52,20 @@ install_pyenv() {
             echo "Error: pyenv installation failed."
             exit 1
         fi
+
+        # Add pyenv to the session's PATH and initialize it
+        export PYENV_ROOT="$HOME/.pyenv"
+        export PATH="$PYENV_ROOT/bin:$PATH"
+        eval "$(pyenv init --path)"
+        eval "$(pyenv init -)"
+        eval "$(pyenv virtualenv-init -)"
+
         echo "pyenv installation complete."
     else
         echo "pyenv is already installed."
     fi
 }
+
 
 # Function to install Python 3.12 if not installed
 install_python() {
