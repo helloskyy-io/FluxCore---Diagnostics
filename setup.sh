@@ -558,12 +558,12 @@ run_diagnostics() {
         echo "Directory exists. Attempting to update the repository..."
 
         # Try to pull the latest changes
-        if ! sudo -i -u fluxuser git -C "$TARGET_DIR" pull; then
+        if ! -i -u fluxuser git -C "$TARGET_DIR" pull; then
             echo -e "\e[31mERROR: Local changes detected preventing a successful git pull.\e[0m"
             echo -e "\e[31mMoving $TARGET_DIR to $BACKUP_DIR to prevent loss of local changes.\e[0m"
             
             # Move the directory to a backup location
-            sudo mv "$TARGET_DIR" "$BACKUP_DIR"
+            mv "$TARGET_DIR" "$BACKUP_DIR"
 
             # Inform the user
             echo -e "\e[32mBackup completed. Cloning a fresh copy of the repository...\e[0m"
@@ -573,14 +573,14 @@ run_diagnostics() {
     # Clone the repository afresh
     if [ ! -d "$TARGET_DIR" ]; then
         echo "Cloning the repository..."
-        sudo -i -u fluxuser git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "$TARGET_DIR"
+        git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "$TARGET_DIR"
     fi
     
     # Make sure run.sh is executable
     if [ -f "$TARGET_DIR/run.sh" ]; then
-        sudo chmod +x "$TARGET_DIR/run.sh"
+        chmod +x "$TARGET_DIR/run.sh"
         # Run the script
-        sudo -i -u fluxuser bash "$TARGET_DIR/run.sh"
+        bash "$TARGET_DIR/run.sh"
     else
         echo "run.sh not found in the repository."
     fi
