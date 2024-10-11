@@ -552,13 +552,27 @@ run_diagnostics() {
     TARGET_DIR="/home/fluxuser/FluxCore-Diagnostics"
     
     # Switch to the fluxuser and check if the directory exists
-    sudo -i -u fluxuser bash << EOF
+    sudo -i -u fluxuser bash << 'EOF'
     if [ ! -d "$TARGET_DIR" ]; then
         echo "Directory doesn't exist. Cloning the repository..."
         git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "$TARGET_DIR"
     else
-        echo "Directory exists. Updating repository..."
-        git -C "$TARGET_DIR" pull
+        echo "Directory exists. Attempting to update the repository..."
+        if ! git -C "$TARGET_DIR" pull; then
+            echo "Error: Could not update repository due to local changes."
+
+            # Prompt the user for confirmation to reset the repo
+            read -p "Would you like to override the local directory and reset to the latest remote version? (y/n): " answer
+            if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
+                echo "Resetting the repository and discarding local changes..."
+                git -C "$TARGET_DIR" fetch --all
+                git -C "$TARGET_DIR" reset --hard origin/main
+                echo "Repository reset to the latest version."
+            else
+                echo "Aborted. Please resolve local changes and try again."
+                exit 1  # Exit to avoid further actions
+            fi
+        fi
     fi
     
     # Make sure run.sh is executable
@@ -571,6 +585,7 @@ run_diagnostics() {
     fi
 EOF
 }
+
 
 
 
