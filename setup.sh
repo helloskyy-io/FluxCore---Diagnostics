@@ -557,28 +557,25 @@ run_diagnostics() {
         git clone https://github.com/helloskyy-io/FluxCore-Diagnostics.git "\$TARGET_DIR"
     else
         echo "Directory exists. Attempting to update the repository..."
-        if ! git -C "\$TARGET_DIR" pull 2>&1; then
-            echo "Error: Could not update repository due to local changes."
+        git_output=\$(git -C "\$TARGET_DIR" pull 2>&1)
 
-            # Check for local changes specifically mentioned in the git pull output
-            if git -C "\$TARGET_DIR" status --porcelain | grep .; then
-                echo "Local changes detected."
+        if [[ "\$git_output" == *"Your local changes to the following files would be overwritten"* ]]; then
+            echo "Error: Local changes are preventing a successful git pull."
+        else
+            echo "Error: git pull failed. Here's the error output:"
+            echo "\$git_output"
+        fi
 
-                # Prompt the user for confirmation to reset the repo
-                read -p "Would you like to override the local directory and reset to the latest remote version? (y/n): " answer
-                if [[ "\$answer" == "y" || "\$answer" == "Y" ]]; then
-                    echo "Resetting the repository and discarding local changes..."
-                    git -C "\$TARGET_DIR" fetch --all
-                    git -C "\$TARGET_DIR" reset --hard origin/main
-                    echo "Repository reset to the latest version."
-                else
-                    echo "Aborted. Please resolve local changes and try again."
-                    exit 1  # Exit to avoid further actions
-                fi
-            else
-                echo "No local changes detected. Please check manually."
-                exit 1
-            fi
+        # Prompt the user for confirmation to reset the repo, regardless of the error
+        read -p "Would you like to override the local directory and reset to the latest remote version? (y/n): " answer
+        if [[ "\$answer" == "y" || "\$answer" == "Y" ]]; then
+            echo "Resetting the repository and discarding local changes..."
+            git -C "\$TARGET_DIR" fetch --all
+            git -C "\$TARGET_DIR" reset --hard origin/main
+            echo "Repository reset to the latest version."
+        else
+            echo "Aborted. Please resolve issues and try again."
+            exit 1  # Exit to avoid further actions
         fi
     fi
     
@@ -592,6 +589,7 @@ run_diagnostics() {
     fi
 EOF
 }
+
 
 
 
