@@ -548,20 +548,21 @@ run_diagnostics() {
     # Check for sudo permissions
     sudo_check
 
-  
-    
-
-    # Switch to the fluxuser and check if the directory exists
+    # Switch to fluxuser and run the necessary commands
     sudo -i -u fluxuser bash << 'EOF'
-    
+
+    # Navigate to home directory of fluxuser
+    cd /home/fluxuser
+
+    # Define the target directory and backup directory
     TARGET_DIR="/home/fluxuser/FluxCore-Diagnostics"
     BACKUP_DIR="/home/fluxuser/FluxCore-Diagnostics-backup-$(date +%Y%m%d%H%M%S)"
-
+    
     if [ -d "$TARGET_DIR" ]; then
         echo "Directory exists. Attempting to update the repository..."
 
         # Try to pull the latest changes
-        if ! -i -u fluxuser git -C "$TARGET_DIR" pull; then
+        if ! git -C "$TARGET_DIR" pull; then
             echo -e "\e[31mERROR: Local changes detected preventing a successful git pull.\e[0m"
             echo -e "\e[31mMoving $TARGET_DIR to $BACKUP_DIR to prevent loss of local changes.\e[0m"
             
@@ -589,7 +590,6 @@ run_diagnostics() {
     fi
 EOF
 }
-
 
 
 
