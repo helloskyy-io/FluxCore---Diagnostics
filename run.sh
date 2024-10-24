@@ -16,188 +16,31 @@ sudo_check() {
     echo ""
 }
 
-# # Function to install system dependencies for Python build
-# install_dependencies() {
-#     echo "Checking system dependencies..."
-#     if ! dpkg -s build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev libncurses5-dev libncursesw5-dev >/dev/null 2>&1; then
-#         echo "System dependencies missing. Installing..."
-#         sudo apt-get update
-#         sudo apt-get install -y \
-#             libssl-dev zlib1g-dev libbz2-dev \
-#             libreadline-dev libsqlite3-dev libffi-dev \
-#             liblzma-dev libncurses5-dev libncursesw5-dev \
-#             build-essential
-#         if ! dpkg -s build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev libncurses5-dev libncursesw5-dev >/dev/null 2>&1; then
-#             echo "Error: Failed to install required system dependencies."
-#             exit 1
-#         else
-#             echo "System dependencies successfully installed."
-#         fi
-#     else
-#         echo "System dependencies are already installed."
-#     fi
-# }
-
-# Function to check the global Python version
-check_global_python_version() {
-    if ! python3 --version &> /dev/null; then
-        echo "Error: No global Python installation found. Please ensure Python is installed."
-        exit 1
-    else
-        # Capture the Python version without using return
-        global_python_version=$(python3 --version 2>&1 | awk '{print $2}')
-        echo "Global Python version: $global_python_version"
-    fi
-}
-
-
-
-# Function to install pyenv if not already installed
-install_pyenv() {
-    global_python_version=$1
-    if ! pyenv versions | grep -q "$global_python_version"; then
-        echo "pyenv not found. Installing pyenv..."
-
-        # Remove any existing pyenv to avoid conflicts
-        sudo rm -rf /home/fluxuser/.pyenv
-
-        # Install pyenv using the official script
-        curl https://pyenv.run | bash
-        if [ $? -ne 0 ]; then
-            echo "Error: pyenv installation failed."
-            exit 1
-        fi
-
-        # Add pyenv to the session's PATH and initialize it
-        export PYENV_ROOT="$HOME/.pyenv"
-        export PATH="$PYENV_ROOT/bin:$PATH"
-        eval "$(pyenv init --path)"
-        eval "$(pyenv init -)"
-        eval "$(pyenv virtualenv-init -)"
-
-        echo "pyenv installation complete."
-    else
-        echo "pyenv is already installed."
-    fi
-}
-
-
-# # Function to install Python 3.12 if not installed
-# install_python() {
-#     if ! pyenv versions | grep -q "3.12.0"; then
-#         pyenv install 3.12.0
-#         if ! pyenv versions | grep -q "3.12.0"; then
-#             echo "Error: Python 3.12.0 installation failed. Exiting..."
-#             exit 1
-#         fi
-#     fi
-# }
-
-# Function to create a virtual environment if it doesn't exist
-create_virtualenv() {
-    if [ ! -d "$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
-        # Get the current Python version used by pyenv
-        current_python_version=$(pyenv global)
-
-        # Create the virtual environment using the current Python version
-        pyenv virtualenv "$current_python_version" fluxcore-diagnostics-env
-
-        if [ ! -d "$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
-            echo "Error: Failed to create virtual environment. Exiting..."
-            exit 1
-        fi
-    else
-        echo "Virtual environment already exists."
-    fi
-}
-
-
-# Function to install Python packages inside the virtualenv
-install_python_packages() {
-    pyenv activate fluxcore-diagnostics-env
-    
-    # Debug output to show the virtual environment activation
-    if [ $? -ne 0 ]; then
-        echo "Error: Failed to activate the virtual environment."
-        exit 1
-    else
-        echo "Virtual environment activated successfully."
-    fi
-
-    # Upgrade pip
-    echo "Upgrading pip..."
-    pip install --upgrade pip
-
-    # Check if the pinned_reqs.txt file exists and has content
-    if [ ! -f /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt ]; then
-        echo "Error: pinned_reqs.txt file not found!"
-        exit 1
-    fi
-
-    if [ ! -s /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt ]; then
-        echo "Error: pinned_reqs.txt is empty!"
-        exit 1
-    fi
-
-    # Install the packages using pip -r (letting pip handle the whole file)
-    echo "Installing required packages from pinned_reqs.txt..."
-    pip install -r /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
-
-    # Verify the installation of 'rich' (or any other package you care about)
-    echo "Verifying installation of 'rich'..."
-    pip show rich
-    if [ $? -ne 0 ]; then
-        echo "Error: 'rich' is still not installed. Exiting..."
-        exit 1
-    else
-        echo "'rich' installed successfully."
-    fi
-
-    # List installed packages for debugging
-    echo "Listing installed packages in the environment..."
-    pip list
-}
-
-# Function to activate the virtualenv and run diagnostics
+# Function to run diagnostics after environment activation
 run_diagnostics() {
-    pyenv activate fluxcore-diagnostics-env
+    python /home/fluxuser/FluxCore-Diagnostics/main.py
     if [ $? -ne 0 ]; then
-        echo "Error: Failed to activate the virtual environment. Exiting..."
+        echo "Error: Diagnostics script failed."
         exit 1
     fi
-    python /home/fluxuser/FluxCore-Diagnostics/main.py
 }
-
-
 
 # Main Execution Flow
 sudo_check
 
 cd /home/fluxuser
 
-# Initialize pyenv for the session
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
+# Check if virtual environment exists, if not create it
+if [ ! -d "fluxcore-diagnostics-env" ]; then
+    python3 -m venv fluxcore-diagnostics-env
+fi
 
-# Query global python version
-py_version=$(check_global_python_version)
+# Activate the virtual environment
+source fluxcore-diagnostics-env/bin/activate
 
-# Install pyenv to manage the env
-install_pyenv "$global_python_version"
-
-# Create virtual environment if not already created
-create_virtualenv
-
-# Install necessary Python packages inside the virtualenv
-install_python_packages
+# Upgrade pip and install requirements
+pip install --upgrade pip
+pip install -r /home/fluxuser/FluxCore-Diagnostics/pinned_reqs.txt
 
 # Run diagnostics
 run_diagnostics
-
-
-
-
-
