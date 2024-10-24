@@ -186,7 +186,7 @@ eval "$(pyenv virtualenv-init -)"
 py_version=$(check_global_python_version)
 
 # Install pyenv to manage the env
-install_pyenv "$py_version"
+install_pyenv "$global_python_version"
 
 # Create virtual environment if not already created
 create_virtualenv
