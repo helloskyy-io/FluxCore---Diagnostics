@@ -1,7 +1,7 @@
 import json
-import subprocess
 from rich.console import Console
 from rich.table import Table
+from tests.check_host_info import check_host_info
 from tests.gpu_driver_tests import check_nvidia_driver_version
 from tests.cuda_installed_test import check_cuda_installed
 from tests.nvidia_kernel_modules import check_nvidia_kernel_modules
@@ -31,7 +31,10 @@ def run_diagnostics():
 
     # Run diagnostics for each test in the config
     for test in config["tests"]:
-        if test["type"] == "gpu_driver_test":
+        if test["type"] == "host_info_test":
+            test_name = test["description"]
+            result, recommendation, color = check_host_info(test)
+        elif test["type"] == "gpu_driver_test":
             test_name = f'{test["description"]} {test["expected_version"]}'
             result, recommendation, color = check_nvidia_driver_version(test)
         elif test["type"] == "cuda_installed_test":
@@ -40,15 +43,15 @@ def run_diagnostics():
         elif test["type"] == "nvidia_kernel_modules":
             test_name = test["description"]
             result, recommendation, color = check_nvidia_kernel_modules(test)
+        elif test["type"] == "fluxcore_version_test":
+            test_name = test["description"]
+            result, recommendation, color = check_fluxcore_version(test)
         elif test["type"] == "fluxcore_service_test":
             test_name = test["description"]
             result, recommendation, color = check_fluxcore_service(test)
         elif test["type"] == "fluxcore_webserver_test":
             test_name = test["description"]
             result, recommendation, color = check_webserver(test)
-        elif test["type"] == "fluxcore_version_test":
-            test_name = test["description"]
-            result, recommendation, color = check_fluxcore_version(test, result_colors)
         elif test["type"] == "rancher_service_test":
             test_name = test["description"]
             result, recommendation, color = check_rancher_service(test)
@@ -64,6 +67,7 @@ def run_diagnostics():
 
     # Print the table to the console
     console.print(table)
+
 
 # Run diagnostics
 if __name__ == "__main__":

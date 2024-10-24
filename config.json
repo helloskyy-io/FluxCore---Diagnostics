@@ -8,6 +8,18 @@
     },
     "tests": [
       {
+        "type": "host_info_test",
+        "description": "Checking Ubuntu and Kernel Version",
+        "pass_result": "Version Retrieved",
+        "fail_result": "Could not retrieve version",
+        "pass_recommendation": "None",
+        "fail_recommendation": "Could not retrieve system version",
+        "colors": {
+          "pass": "green",
+          "fail": "red"
+        }
+      },
+      {
         "type": "gpu_driver_test",
         "description": "Testing for Nvidia Driver and Version",
         "expected_version": "550",
