@@ -152,19 +152,15 @@ sudo_check
 
 cd /home/fluxuser
 
-# Initialize pyenv for the session once
+# Initialize pyenv for the session
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
-# Check if Python 3.12 is installed via pyenv. If not, install dependencies and pyenv
-if ! pyenv versions | grep -q "3.12.0"; then
-    install_dependencies
-    install_pyenv
-    install_python
-fi
+# Install pyenv to manage the env
+install_pyenv
 
 # Create virtual environment if not already created
 create_virtualenv
