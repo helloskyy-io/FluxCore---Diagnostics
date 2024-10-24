@@ -45,7 +45,7 @@ def run_diagnostics():
             result, recommendation, color = check_nvidia_kernel_modules(test)
         elif test["type"] == "fluxcore_version_test":
             test_name = test["description"]
-            result, recommendation, color = check_fluxcore_version(test)
+            result, recommendation, color = check_fluxcore_version(test, result_colors)  # Pass result_colors here
         elif test["type"] == "fluxcore_service_test":
             test_name = test["description"]
             result, recommendation, color = check_fluxcore_service(test)
@@ -72,3 +72,4 @@ def run_diagnostics():
 # Run diagnostics
 if __name__ == "__main__":
     run_diagnostics()
+

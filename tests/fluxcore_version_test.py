@@ -1,29 +1,25 @@
 import subprocess
+import json
 
 def check_fluxcore_version(test_config, result_colors):
     try:
-        # Get the installed version
+        # Run the command to check the installed version
         installed_version_result = subprocess.run(['/home/fluxuser/fluxcore-linux-amd64', '-version'],
-                                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                                                  stdout=subprocess.PIPE, text=True)
         installed_version = installed_version_result.stdout.strip()
 
-        # Get the latest release version
+        # Run the command to get the latest version
         latest_version_result = subprocess.run(['/home/fluxuser/fluxcore-linux-amd64', '-latest'],
-                                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        
-        # Filter out lines containing debug info
-        latest_version_lines = latest_version_result.stdout.splitlines()
-        latest_version = next((line for line in latest_version_lines if "debug" not in line), None)
+                                               stdout=subprocess.PIPE, text=True)
+        latest_version = latest_version_result.stdout.strip().splitlines()[-1]  # Get the actual version from the last line
 
-        # Check if both commands were successful
-        if installed_version_result.returncode == 0 and latest_version_result.returncode == 0 and latest_version:
-            if installed_version == latest_version:
-                return f"FluxCore {installed_version}", test_config["pass_recommendation"], result_colors["pass"]
-            else:
-                return f"FluxCore {installed_version} (outdated)", f"Please update to {latest_version}", result_colors["fail"]
+        # Compare versions and determine pass/fail
+        if installed_version == latest_version:
+            return f"FluxCore {installed_version}", test_config["pass_recommendation"], result_colors["pass"]
         else:
-            return test_config["fail_result"], test_config["fail_recommendation"], result_colors["fail"]
+            return f"FluxCore {installed_version} (outdated)", test_config["fail_recommendation"], result_colors["fail"]
 
     except Exception as e:
         return test_config["fail_result"], str(e), result_colors["fail"]
+
 
