@@ -1,4 +1,5 @@
 import json
+import subprocess
 from rich.console import Console
 from rich.table import Table
 from tests.gpu_driver_tests import check_nvidia_driver_version

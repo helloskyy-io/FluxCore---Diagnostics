@@ -1,4 +1,6 @@
-def check_fluxcore_version(test_config):
+import subprocess
+
+def check_fluxcore_version(test_config, result_colors):
     try:
         # Get the installed version
         installed_version_result = subprocess.run(['/home/fluxuser/fluxcore-linux-amd64', '-version'],
