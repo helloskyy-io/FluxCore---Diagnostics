@@ -10,10 +10,13 @@ def check_fluxcore_version(test_config, result_colors):
         # Get the latest release version
         latest_version_result = subprocess.run(['/home/fluxuser/fluxcore-linux-amd64', '-latest'],
                                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        latest_version = latest_version_result.stdout.strip()
+        
+        # Filter out lines containing debug info
+        latest_version_lines = latest_version_result.stdout.splitlines()
+        latest_version = next((line for line in latest_version_lines if "debug" not in line), None)
 
         # Check if both commands were successful
-        if installed_version_result.returncode == 0 and latest_version_result.returncode == 0:
+        if installed_version_result.returncode == 0 and latest_version_result.returncode == 0 and latest_version:
             if installed_version == latest_version:
                 return f"FluxCore {installed_version}", test_config["pass_recommendation"], result_colors["pass"]
             else:
