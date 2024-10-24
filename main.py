@@ -48,7 +48,7 @@ def run_diagnostics():
             result, recommendation, color = check_webserver(test)
         elif test["type"] == "fluxcore_version_test":
             test_name = test["description"]
-            result, recommendation, color = check_fluxcore_version(test)
+            result, recommendation, color = check_fluxcore_version(test, result_colors)
         elif test["type"] == "rancher_service_test":
             test_name = test["description"]
             result, recommendation, color = check_rancher_service(test)
