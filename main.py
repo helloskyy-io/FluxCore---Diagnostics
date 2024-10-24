@@ -33,7 +33,7 @@ def run_diagnostics():
     for test in config["tests"]:
         if test["type"] == "host_info_test":
             test_name = test["description"]
-            result, recommendation, color = check_host_info(test)
+            result, recommendation, color = check_host_info()  # No argument here
         elif test["type"] == "gpu_driver_test":
             test_name = f'{test["description"]} {test["expected_version"]}'
             result, recommendation, color = check_nvidia_driver_version(test)
@@ -72,4 +72,3 @@ def run_diagnostics():
 # Run diagnostics
 if __name__ == "__main__":
     run_diagnostics()
-
