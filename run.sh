@@ -16,31 +16,46 @@ sudo_check() {
     echo ""
 }
 
-# Function to install system dependencies for Python build
-install_dependencies() {
-    echo "Checking system dependencies..."
-    if ! dpkg -s build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev libncurses5-dev libncursesw5-dev >/dev/null 2>&1; then
-        echo "System dependencies missing. Installing..."
-        sudo apt-get update
-        sudo apt-get install -y \
-            libssl-dev zlib1g-dev libbz2-dev \
-            libreadline-dev libsqlite3-dev libffi-dev \
-            liblzma-dev libncurses5-dev libncursesw5-dev \
-            build-essential
-        if ! dpkg -s build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev libncurses5-dev libncursesw5-dev >/dev/null 2>&1; then
-            echo "Error: Failed to install required system dependencies."
-            exit 1
-        else
-            echo "System dependencies successfully installed."
-        fi
+# # Function to install system dependencies for Python build
+# install_dependencies() {
+#     echo "Checking system dependencies..."
+#     if ! dpkg -s build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev libncurses5-dev libncursesw5-dev >/dev/null 2>&1; then
+#         echo "System dependencies missing. Installing..."
+#         sudo apt-get update
+#         sudo apt-get install -y \
+#             libssl-dev zlib1g-dev libbz2-dev \
+#             libreadline-dev libsqlite3-dev libffi-dev \
+#             liblzma-dev libncurses5-dev libncursesw5-dev \
+#             build-essential
+#         if ! dpkg -s build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev libncurses5-dev libncursesw5-dev >/dev/null 2>&1; then
+#             echo "Error: Failed to install required system dependencies."
+#             exit 1
+#         else
+#             echo "System dependencies successfully installed."
+#         fi
+#     else
+#         echo "System dependencies are already installed."
+#     fi
+# }
+
+# Function to check the global Python version
+check_global_python_version() {
+    if ! python3 --version &> /dev/null; then
+        echo "Error: No global Python installation found. Please ensure Python is installed."
+        exit 1
     else
-        echo "System dependencies are already installed."
+        global_python_version=$(python3 --version 2>&1 | awk '{print $2}')
+        echo "Global Python version: $global_python_version"
     fi
+
+    return $global_python_version
 }
+
 
 # Function to install pyenv if not already installed
 install_pyenv() {
-    if ! command -v pyenv &> /dev/null; then
+    global_python_version=$1
+    if ! pyenv versions | grep -q "$global_python_version"; then
         echo "pyenv not found. Installing pyenv..."
 
         # Remove any existing pyenv to avoid conflicts
@@ -67,21 +82,26 @@ install_pyenv() {
 }
 
 
-# Function to install Python 3.12 if not installed
-install_python() {
-    if ! pyenv versions | grep -q "3.12.0"; then
-        pyenv install 3.12.0
-        if ! pyenv versions | grep -q "3.12.0"; then
-            echo "Error: Python 3.12.0 installation failed. Exiting..."
-            exit 1
-        fi
-    fi
-}
+# # Function to install Python 3.12 if not installed
+# install_python() {
+#     if ! pyenv versions | grep -q "3.12.0"; then
+#         pyenv install 3.12.0
+#         if ! pyenv versions | grep -q "3.12.0"; then
+#             echo "Error: Python 3.12.0 installation failed. Exiting..."
+#             exit 1
+#         fi
+#     fi
+# }
 
 # Function to create a virtual environment if it doesn't exist
 create_virtualenv() {
     if [ ! -d "$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
-        pyenv virtualenv 3.12.0 fluxcore-diagnostics-env
+        # Get the current Python version used by pyenv
+        current_python_version=$(pyenv global)
+
+        # Create the virtual environment using the current Python version
+        pyenv virtualenv "$current_python_version" fluxcore-diagnostics-env
+
         if [ ! -d "$HOME/.pyenv/versions/fluxcore-diagnostics-env" ]; then
             echo "Error: Failed to create virtual environment. Exiting..."
             exit 1
@@ -90,6 +110,7 @@ create_virtualenv() {
         echo "Virtual environment already exists."
     fi
 }
+
 
 # Function to install Python packages inside the virtualenv
 install_python_packages() {
@@ -147,6 +168,8 @@ run_diagnostics() {
     python /home/fluxuser/FluxCore-Diagnostics/main.py
 }
 
+
+
 # Main Execution Flow
 sudo_check
 
@@ -159,8 +182,11 @@ eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
+# Query global python version
+py_version=$(check_global_python_version)
+
 # Install pyenv to manage the env
-install_pyenv
+install_pyenv "$py_version"
 
 # Create virtual environment if not already created
 create_virtualenv
