@@ -8,6 +8,18 @@
     },
     "tests": [
       {
+        "type": "gpu_test",
+        "description": "Checking Attached GPUs",
+        "pass_result": "GPUs detected",
+        "fail_result": "No GPUs detected",
+        "pass_recommendation": "None",
+        "fail_recommendation": "Ensure Nvidia drivers are installed or verify GPU connections",
+        "colors": {
+            "pass": "green",
+            "fail": "red"
+        }
+      },
+      {
         "type": "host_info_test",
         "description": "Checking Ubuntu and Kernel Version",
         "pass_result": "Version Retrieved",

@@ -2,6 +2,7 @@ import json
 from rich.console import Console
 from rich.table import Table
 from tests.check_host_info import check_host_info
+from tests.check_gpus import check_gpus
 from tests.gpu_driver_tests import check_nvidia_driver_version
 from tests.cuda_installed_test import check_cuda_installed
 from tests.nvidia_kernel_modules import check_nvidia_kernel_modules
@@ -33,7 +34,10 @@ def run_diagnostics():
     for test in config["tests"]:
         if test["type"] == "host_info_test":
             test_name = test["description"]
-            result, recommendation, color = check_host_info(test)  # Pass the test config here
+            result, recommendation, color = check_host_info(test) 
+        elif test["type"] == "gpu_test":
+            test_name = test["description"]
+            result, recommendation, color = check_gpus(test)     
         elif test["type"] == "gpu_driver_test":
             test_name = f'{test["description"]} {test["expected_version"]}'
             result, recommendation, color = check_nvidia_driver_version(test)
@@ -45,7 +49,7 @@ def run_diagnostics():
             result, recommendation, color = check_nvidia_kernel_modules(test)
         elif test["type"] == "fluxcore_version_test":
             test_name = test["description"]
-            result, recommendation, color = check_fluxcore_version(test, result_colors)  # Pass result_colors here
+            result, recommendation, color = check_fluxcore_version(test, result_colors) 
         elif test["type"] == "fluxcore_service_test":
             test_name = test["description"]
             result, recommendation, color = check_fluxcore_service(test)
