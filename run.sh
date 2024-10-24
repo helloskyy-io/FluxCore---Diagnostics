@@ -44,12 +44,12 @@ check_global_python_version() {
         echo "Error: No global Python installation found. Please ensure Python is installed."
         exit 1
     else
+        # Capture the Python version without using return
         global_python_version=$(python3 --version 2>&1 | awk '{print $2}')
         echo "Global Python version: $global_python_version"
     fi
-
-    return $global_python_version
 }
+
 
 
 # Function to install pyenv if not already installed
