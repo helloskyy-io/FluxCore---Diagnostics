@@ -78,7 +78,7 @@
         "pass_result": "Version Retrieved",
         "fail_result": "Could not retrieve version",
         "pass_recommendation": "None",
-        "fail_recommendation": "Please ensure FluxCore is installed properly",
+        "fail_recommendation": "Please ensure FluxCore is installed properly or consider updating if required",
         "colors": {
           "pass": "green",
           "fail": "red"
