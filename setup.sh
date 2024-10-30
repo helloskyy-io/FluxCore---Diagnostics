@@ -551,6 +551,12 @@ run_diagnostics() {
     # Switch to fluxuser and run the necessary commands
     sudo -i -u fluxuser bash << 'EOF'
 
+    # Check if git is installed
+    if ! command -v git &> /dev/null; then
+        echo -e "\e[31mERROR: 'git' is not installed. Please install git and rerun the script.\e[0m"
+        exit 1
+    fi
+
     # Navigate to home directory of fluxuser
     cd /home/fluxuser
 
